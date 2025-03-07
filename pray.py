@@ -110,7 +110,7 @@ def parse_date(date_str):
     except ValueError:
         return date_str
 
-def standardize_names(name):
+def standardize_names_old(name):
     """Standardize person names to ensure consistent format"""
     name = name.strip()
     
@@ -127,6 +127,57 @@ def standardize_names(name):
 
     # 다양한 구분자 처리
     name = re.sub(r'[\s,/&]+', '/', name)  # 공백, `,`, `&` 등을 `/`로 변환
+
+    # 한 글자씩 붙어있는 경우 처리 (예: "정철희경" -> "정철/희경")
+    for group in name_groups:
+        combined1 = "".join(group)
+        combined2 = "".join(group[::-1])  # 역순도 확인
+        if combined1 in name or combined2 in name:
+            return f"{group[0]}/{group[1]}"
+
+    # `/`로 나눈 후 그룹에 해당하면 표준화
+    name_parts = name.split('/')
+    if len(name_parts) == 2:
+        for group in name_groups:
+            if name_parts[0] in group and name_parts[1] in group:
+                return f"{group[0]}/{group[1]}"
+
+    # 단일 이름을 입력했을 때 그룹의 대표 이름 반환
+    for group in name_groups:
+        if name in group:
+            return f"{group[0]}/{group[1]}"
+    
+    return name
+
+def standardize_names(name):
+    """Standardize person names to ensure consistent format"""
+    name = name.strip()
+    
+    # 정의된 그룹들
+    name_groups = [
+        ["연지", "현보"],
+        ["윤주", "용선"],
+        ["가희", "창환"],
+        ["희경", "정철"],
+        ["보름", "화석"],
+        ["소영", "성훈"],
+        ["수경", "영기"]
+    ]
+
+    # 다양한 구분자 처리
+    name = re.sub(r'[\s,/&]+', '/', name.strip().replace(" ",""))  # 공백, `,`, `&` 등을 `/`로 변환
+
+    # 성 제거 (한글 이름은 대부분 성이 한 글자이므로 앞 글자 삭제)
+    name_parts = name.split('/')
+    cleaned_names = []
+    
+    for part in name_parts:
+        if len(part) == 3:  # 3글자 이름이면 성을 제거하고 저장
+            cleaned_names.append(part[1:])
+        else:
+            cleaned_names.append(part)
+    
+    name = "/".join(cleaned_names)  # 정리된 이름 다시 합치기
 
     # 한 글자씩 붙어있는 경우 처리 (예: "정철희경" -> "정철/희경")
     for group in name_groups:
@@ -203,7 +254,8 @@ def create_prayer_tracking_df(conversation_blocks):
         "소영/성훈",
         "가희/창환",
         "연지/현보",
-        "윤주/용선"
+        "윤주/용선",
+        "수경/영기"
     ]
     
     # Print debugging info
@@ -293,7 +345,8 @@ if view_mode == "날짜별 보기":
             "소영/성훈",
             "가희/창환",
             "연지/현보",
-            "윤주/용선"
+            "윤주/용선",
+            "수경/영기"
         ]
         
         # Sort people based on standard_order
@@ -319,7 +372,8 @@ elif view_mode == "사람별 보기":
         "소영/성훈",
         "가희/창환",
         "연지/현보",
-        "윤주/용선"
+        "윤주/용선",
+        "수경/영기"
     ]
     
     # Create tabs for each person in standard order
