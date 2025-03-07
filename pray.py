@@ -57,12 +57,50 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+import re
+import os
+
+def extract_conversation_blocks(file_path):
+    if not os.path.exists(file_path):
+        print(f"Error: File '{file_path}' not found.")
+        return []
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+    inside_block = False
+    blocks = {}
+    current_block = []
+    for i, line in enumerate(lines):
+        if re.search(r'\b(23|24|25)\d{4}\b', line.strip()):
+            x = re.search(r'\b(23|24|25)\d{4}\b', line.strip())
+            ids = x.group(0)
+            current_block = [line.strip()]
+            inside_block = True
+        elif inside_block:
+            if re.match(r'^\[.*?\]', line.strip()):
+                inside_block = False
+                filtered = [x for x in current_block if "----------" not in x] # 날짜 표기 라인 제거
+                current_block_res = "\n".join(filtered)
+                #print(ids)
+                blocks.update({ids:current_block_res})
+                #blocks.append(current_block_res)
+            else:
+                current_block.append(line.strip())
+    return blocks
+
+file_path = "./KakaoTalk_20250307_0852_04_211_group.txt"
+
+if os.path.exists(file_path):
+    conversation_blocks = extract_conversation_blocks(file_path)
+    # 블록 출력
+    for i, block in enumerate(conversation_blocks):
+        print(f"--- Block {i+1} ---\n{block}\n")
+else:
+    print(f"Error: File '{file_path}' does not exist. Please check the file path.")
+
 # Sample data - replace with your actual dictionary
-conversation_blocks = {
-    '230109': '[이정철] [오전 8:17] 230109\n정철: 아내가 골반염으로 고생하고 있습니다. 항셍제가 잘 듣고 속히 회복할수있도록, 아내의 건강, 2세의 축복, 지혜로운 삶을 살고 운동을 사랑하는 사람으로 거듭나길\n희경: 자녀의 축복, 새해에는 영육이 더 강건하고 지혜로운 딸 되길.\n창환/가 희: 가족건강, 주일성수 잘하도록 스케줄 잘 조정되길, 무릎수술 안하게 됨(할렐루야), 가희자매 출산까지 남은 시간 순적히 잘 보내도록.\n 보름: 연말 추우면서 다운됐었는데 정비하는 기간이라는 깨달음 주심, 자녀의 축복을 위해 (임신 준비하며 다른 가정들도 중보하게 되어 감사) 배우면서 에너지를 얻는데 임신 전 즐겁게 잘 배우며 준비되길, 어느 순간에도 낙심대신 감사를, 남편에게 서운함 들때가 있는데 서로 지혜롭게 잘 헤쳐나갈 수 있도록.\n소영/성훈: 집이 좋은시기에 잘 팔리고 좋은시기에 새로운 집으로 이사 잘 가길, 지호가 17개월 들어서면서 때쓰고 악지르며 울고 소심한 반항을 ? 하기 시작했는데 감정적으로 하는게 아니라 이 시기를 지혜롭게 잘 헤쳐나갈 수 있도록...\n현보/연지:\n1. 가족 건강. 특히   지민이 심장 구멍 돌전에 매꿔지도록\n2. 남편 육아휴직 신청/진행 순조롭게 잘 될 수 있도록\n3. 지민이가 어린이집 잘 적응하고 좋은 선생님,친구,학부모를 만나 선한 공동체에서 생활할 수 있도록',
-    '230129': '[희야♡] [오후 8:27] 기도제목 230129\n희경/정철: 건강 회복. 자녀의 축복.\n보름/화석: 강원도로 옮기는 것에 대해 고민중.지혜주셔서 좋은 때에 옮길 수 있도롭.\n소영/성훈: 인사이동 후 바뀌신 팀장님이 요구사항 많으심ㅠ(일일보고등등) 빠른 인사이동이 있도록.. 집이 속히  팔리도록. 우집사님 3월 초 기사 필기시험 준비중인데 잘 준비해서 기사 취득하도록.\n가희/창환: 이사갈 주택을 찾고 있는데 네식구가 살 좋은 곳이 구해지도록. 둘째 찬희 2월 3째주 출산 예정. 건강하게 태어나길.\n연지/현보: 돌지나고 지민이 심장 검사하는데 깨끗히 아물었기를. 부부의 건강 위해. 현보형제 육아휴직 잘 진행되길. 지민이가 3월부터 어린이집 가는데 좋은 친구, 선생님들 만나길. 돌치레 없이 잘 지나가길.\n용선/윤주: 예비신부 인사발령에 따라 집 위치 결정 예정. 관저로 배정될 수 있기를. 3/1 결혼인데 남은 부분들이 지혜롭게 잘 조율될  수 있도록.'
-    # Add more entries as needed
-}
+#conversation_blocks = {
+#    '230109': '~~~~'} # Add more entries as needed
+#}
 
 def parse_date(date_str):
     """Convert YYMMDD to a formatted date string"""
