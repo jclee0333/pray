@@ -114,33 +114,40 @@ def standardize_names(name):
     """Standardize person names to ensure consistent format"""
     name = name.strip()
     
-    # Handle special cases where order doesn't matter
+    # 정의된 그룹들
+    name_groups = [
+        ["연지", "현보"],
+        ["윤주", "용선"],
+        ["가희", "창환"],
+        ["희경", "정철"],
+        ["보름", "화석"],
+        ["소영", "성훈"],
+        ["수경", "영기"]
+    ]
+
+    # 다양한 구분자 처리
+    name = re.sub(r'[\s,/&]+', '/', name)  # 공백, `,`, `&` 등을 `/`로 변환
+
+    # 한 글자씩 붙어있는 경우 처리 (예: "정철희경" -> "정철/희경")
+    for group in name_groups:
+        combined1 = "".join(group)
+        combined2 = "".join(group[::-1])  # 역순도 확인
+        if combined1 in name or combined2 in name:
+            return f"{group[0]}/{group[1]}"
+
+    # `/`로 나눈 후 그룹에 해당하면 표준화
     name_parts = name.split('/')
     if len(name_parts) == 2:
-        # Check if this is one of the couples where order needs to be standardized
-        couples = [
-            ["연지", "현보"],
-            ["윤주", "용선"],
-            ["가희", "창환"],
-            ["희경", "정철"]
-        ]
-        
-        for couple in couples:
-            # If both names are in the couple (regardless of order), standardize to the preferred order
-            if name_parts[0].strip() in couple and name_parts[1].strip() in couple:
-                return f"{couple[0]}/{couple[1]}"
+        for group in name_groups:
+            if name_parts[0] in group and name_parts[1] in group:
+                return f"{group[0]}/{group[1]}"
+
+    # 단일 이름을 입력했을 때 그룹의 대표 이름 반환
+    for group in name_groups:
+        if name in group:
+            return f"{group[0]}/{group[1]}"
     
-    # Define name mappings for cases not covered above
-    name_mappings = {
-        "창환/가 희": "가희/창환",
-        "보름": "보름/화석",
-        "보름/화석": "보름/화석",
-        "소영/성훈": "소영/성훈",
-        "정철": "희경/정철",
-        "희경": "희경/정철"
-    }
-    
-    return name_mappings.get(name, name)
+    return name
 
 def extract_prayer_requests(text):
     """Extract prayer requests from text"""
