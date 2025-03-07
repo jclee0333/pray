@@ -87,7 +87,8 @@ def extract_conversation_blocks(file_path):
                 current_block.append(line.strip())
     return blocks
 
-file_path = "./KakaoTalk_20250307_0852_04_211_group.txt"
+#file_path = "./KakaoTalk_20250307_0852_04_211_group.txt"
+file_path = "./KakaoTalkChats.txt"
 
 if os.path.exists(file_path):
     conversation_blocks = extract_conversation_blocks(file_path)
