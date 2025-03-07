@@ -165,7 +165,7 @@ def standardize_names(name):
     ]
 
     # 다양한 구분자 처리
-    name = re.sub(r'[\s,/&]+', '/', name.strip().replace(" ",""))  # 공백, `,`, `&` 등을 `/`로 변환
+    name = re.sub(r'[\s,/&]+', '/', name.strip().replace(" ","").replace(".","/").replace("(","").replace(")",":"))  # 공백, `,`, `&` 등을 `/`로 변환
 
     # 성 제거 (한글 이름은 대부분 성이 한 글자이므로 앞 글자 삭제)
     name_parts = name.split('/')
